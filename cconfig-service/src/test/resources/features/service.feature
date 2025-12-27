@@ -1,0 +1,233 @@
+Feature: Tests the Chenile Config Service using a REST client.
+  Chenile Config must be able to store the incremental updates in a DB.
+  It must return the value for one key which can be either a string or a JSON.
+  All values will be mutated by the DB records for select requests.
+
+  Scenario: Save the overriding cconfig for a string key.
+    Given that "tenant" equals "tenant0"
+    When I construct a REST request with header "x-chenile-tenant-id" and value "${tenant}"
+    And I POST a REST request to URL "/cconfig" with payload
+    """JSON
+    {
+      "moduleName": "ctest",
+      "keyName": "key1",
+      "avalue": "value2",
+      "customAttribute": "${tenant}"
+	}
+	"""
+    Then success is true
+    And store "$.payload.id" from response to "id"
+    # And the REST response key "tenant" is "${tenant}"
+    # And the REST response key "createdBy" is "${employee}"
+
+  Scenario: Save the overriding cconfig for a string key.
+    Given that "tenant" equals "tenant0"
+    When I construct a REST request with header "x-chenile-tenant-id" and value "${tenant}"
+    And I POST a REST request to URL "/cconfig" with payload
+    """JSON
+    {
+      "moduleName": "ctest",
+      "keyName": "key1",
+      "avalue": "value5",
+      "customAttribute": "__GLOBAL__"
+	}
+	"""
+    Then success is true
+    And store "$.payload.id" from response to "id"
+
+  Scenario: Save the overriding cconfig for a JSON key. This alters a specific portion of the key
+    Given that "tenant" equals "tenant0"
+    When I construct a REST request with header "x-chenile-tenant-id" and value "${tenant}"
+    And I POST a REST request to URL "/cconfig" with payload
+    """JSON
+    {
+      "moduleName": "ctest",
+      "keyName": "key2",
+      "avalue": "456",
+      "path": "abc",
+      "customAttribute": "${tenant}"
+	}
+	"""
+    Then success is true
+    And store "$.payload.id" from response to "id"
+
+  Scenario: Save the overriding cconfig for a JSON key. This alters a specific portion of the key.
+    In this case the portion changed is deep within the key. (Specific array index is altered)
+    Given that "tenant" equals "tenant0"
+    When I construct a REST request with header "x-chenile-tenant-id" and value "${tenant}"
+    And I POST a REST request to URL "/cconfig" with payload
+    """JSON
+    {
+      "moduleName": "ctest",
+      "keyName": "key2",
+      "avalue": "101",
+      "path": "fields.field1.range.1",
+      "customAttribute": "${tenant}"
+	}
+	"""
+    Then success is true
+    And store "$.payload.id" from response to "id"
+
+  Scenario: Save the overriding cconfig for a JSON key. This alters a specific portion of the key.
+  In this case we add a new field. We will add an entire JSON field and expect this to be in incorporated
+    Given that "tenant" equals "tenant0"
+    When I construct a REST request with header "x-chenile-tenant-id" and value "${tenant}"
+    And I POST a REST request to URL "/cconfig" with payload
+    """JSON
+    {
+      "moduleName": "ctest",
+      "keyName": "key2",
+      "avalue": "{\"range\": [2,200]}",
+      "path": "fields.field2",
+      "customAttribute": "__GLOBAL__"
+	}
+	"""
+    Then success is true
+    And store "$.payload.id" from response to "id"
+
+  Scenario: Save the overriding cconfig for a JSON key. This adds new JSON nodes to the key key2
+    Given that "tenant" equals "tenant0"
+    When I construct a REST request with header "x-chenile-tenant-id" and value "${tenant}"
+    And I POST a REST request to URL "/cconfig" with payload
+    """JSON
+    {
+      "moduleName": "ctest",
+      "keyName": "key2",
+      "avalue": "777",
+      "path": "def",
+      "customAttribute": "${tenant}"
+	}
+	"""
+    Then success is true
+    And store "$.payload.id" from response to "id"
+
+  Scenario: Save the overriding cconfig for a JSON key in another module.
+    Given that "tenant" equals "tenant0"
+    And that "employee" equals "E1"
+    When I construct a REST request with header "x-chenile-tenant-id" and value "${tenant}"
+    And I construct a REST request with header "x-chenile-eid" and value "${employee}"
+    And I POST a REST request to URL "/cconfig" with payload
+    """JSON
+    {
+      "moduleName": "ctest1.ctest1",
+      "keyName": "key3",
+      "avalue": "some_other_value",
+      "path": "some_name",
+      "customAttribute": "${tenant}"
+	}
+	"""
+    Then success is true
+    And store "$.payload.id" from response to "id"
+
+  Scenario: Retrieve the saved cconfig
+    Given that "entity" equals "cconfig"
+    And I construct a REST request with header "x-chenile-tenant-id" and value "tenant0"
+    And I GET a REST request to URL "/${entity}/${id}"
+    Then success is true
+    And the REST response key "id" is "${id}"
+
+  Scenario: Save a cconfig using an ID that already is determined
+    Given that "id" equals "123"
+    And I construct a REST request with header "x-chenile-tenant-id" and value "tenant0"
+    And I construct a REST request with header "x-chenile-eid" and value "E1"
+    And I POST a REST request to URL "/cconfig" with payload
+  """json
+  {
+    "id": "${id}",
+    "keyName": "key3",
+    "avalue": "456",
+    "path": "key2.abc",
+    "customAttribute": "${tenant}"
+  }
+  """
+    Then success is true
+    And the REST response key "id" is "${id}"
+
+  Scenario: Retrieve the saved cconfig
+    Given that "entity" equals "cconfig"
+    And I construct a REST request with header "x-chenile-tenant-id" and value "tenant0"
+    And I GET a REST request to URL "/${entity}/${id}"
+    Then success is true
+    And the REST response key "id" is "${id}"
+
+  Scenario: Get the value for "key1" for tenant0. This tests simple values being set
+    Given that "entity" equals "config"
+    And I construct a REST request with header "x-chenile-tenant-id" and value "tenant0"
+    And I GET a REST request to URL "/${entity}/ctest.key1"
+    Then success is true
+    And the value of "$.payload" is "value2"
+
+  Scenario: Get the value for "key2". This tests setting complex JSONs.
+    This tests non-conflicting updates performed for __GLOBAL__ and tenant0.
+    Both the updates must be reflected for tenant0
+    Given that "entity" equals "config"
+    And I construct a REST request with header "x-chenile-tenant-id" and value "tenant0"
+    And I GET a REST request to URL "/${entity}/ctest.key2"
+    Then success is true
+    And the REST response key "abc" is "456"
+    And the REST response key "def" is "777"
+    And the REST response key "fields.field1.range[0]" is "1"
+    And the REST response key "fields.field1.range[1]" is "101"
+    And the REST response key "fields.field2.range[0]" is "2"
+    And the REST response key "fields.field2.range[1]" is "200"
+
+  Scenario: Get the value for "key2". This tests setting complex JSONs.
+  This tests updates performed for __GLOBAL__
+    Given that "entity" equals "config"
+    And I construct a REST request with header "x-chenile-tenant-id" and value "tenant1"
+    And I GET a REST request to URL "/${entity}/ctest.key2"
+    Then success is true
+    And the REST response key "abc" is "123"
+    And the REST response does not contain key "def"
+    And the REST response key "fields.field1.range[0]" is "1"
+    And the REST response key "fields.field1.range[1]" is "100"
+    And the REST response key "fields.field2.range[0]" is "2"
+    And the REST response key "fields.field2.range[1]" is "200"
+
+  Scenario: Get the value for "key3" - this tests sub modules.
+    Given that "entity" equals "config"
+    And I construct a REST request with header "x-chenile-tenant-id" and value "tenant0"
+    And I GET a REST request to URL "/${entity}/ctest1.ctest1.key3"
+    Then success is true
+    And the REST response key "some_name" is "some_other_value"
+
+  Scenario: Get the value for "key1" for non tenant0. This tests __GLOBAL__
+    Given that "entity" equals "config"
+    And I GET a REST request to URL "/${entity}/ctest.key1"
+    Then success is true
+    And the value of "$.payload" is "value5"
+
+  Scenario: Get all the keys and values for module ctest for tenant0. This checks if all keys are being returned.
+    Given that "entity" equals "config"
+    And I construct a REST request with header "x-chenile-tenant-id" and value "tenant0"
+    And I GET a REST request to URL "/${entity}/ctest"
+    Then success is true
+    And the REST response key "key1" is "value2"
+    And the REST response key "key2.abc" is "456"
+    And the REST response key "key2.def" is "777"
+    And the REST response key "key2.fields.field1.range[0]" is "1"
+    And the REST response key "key2.fields.field1.range[1]" is "101"
+    And the REST response key "key2.fields.field2.range[0]" is "2"
+    And the REST response key "key2.fields.field2.range[1]" is "200"
+    And the REST response key "key4" is "value4"
+    And the REST response key "key5" is "value5"
+
+  Scenario: Get the value for "key4" tenant0. This tests introducing new keys in the DB for tenant0
+    Given that "entity" equals "config"
+    And I construct a REST request with header "x-chenile-tenant-id" and value "tenant0"
+    And I GET a REST request to URL "/${entity}/ctest.key4"
+    Then success is true
+    And the value of "$.payload" is "value4"
+
+  Scenario: Get the value for "key5" non tenant0. This tests introducing new keys in the DB for __GLOBAL__
+    Given that "entity" equals "config"
+    And I GET a REST request to URL "/${entity}/ctest.key5"
+    Then success is true
+    And the value of "$.payload" is "value5"
+
+  Scenario: Get the value for "key5" tenant8. This tests introducing new keys in the DB for __GLOBAL__
+    Given that "entity" equals "config"
+    And I construct a REST request with header "x-chenile-tenant-id" and value "tenant8"
+    And I GET a REST request to URL "/${entity}/ctest.key5"
+    Then success is true
+    And the value of "$.payload" is "value5"
