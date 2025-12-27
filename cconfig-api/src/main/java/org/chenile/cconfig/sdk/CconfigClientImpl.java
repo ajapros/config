@@ -69,12 +69,15 @@ public class CconfigClientImpl implements  CconfigClient{
     @SuppressWarnings("unchecked")
     private Map<String,Object> getJsonMapForModule(String module){
         String s = readModuleAsString(module);
+        if (s == null)
+            return new LinkedHashMap<>();
         return (Map<String,Object>)objectify(s);
     }
 
     /**
      * @param module name of the module
-     * @return all the keys in the module
+     * @return all the keys in the module. This includes all the keys in the JSON file (if found)
+     * and also the DB keys. 
      */
     private Map<String,Object> allKeysForModule(String module,String customAttribute) {
         Map<String,Object> allKeys = memoryCache.findJsonMap(module,customAttribute);
@@ -118,7 +121,9 @@ public class CconfigClientImpl implements  CconfigClient{
         logger.debug("Finding the JSON file for {}",modPath);
 
         try(InputStream stream = getClass().getClassLoader().getResourceAsStream(modPath)) {
-            assert stream != null;
+            if(stream == null){
+                return null;
+            }
             s = new String(stream.readAllBytes(), StandardCharsets.UTF_8);
             moduleCache.put(module,s);
             return s;

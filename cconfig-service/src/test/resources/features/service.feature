@@ -231,3 +231,9 @@ Feature: Tests the Chenile Config Service using a REST client.
     And I GET a REST request to URL "/${entity}/ctest.key5"
     Then success is true
     And the value of "$.payload" is "value5"
+
+  Scenario: Get the value for "key20". This tests introducing new module in DB without corresponding JSON
+    Given that "entity" equals "config"
+    And I GET a REST request to URL "/${entity}/ctest20.key20"
+    Then success is true
+    And the value of "$.payload" is "value20"
