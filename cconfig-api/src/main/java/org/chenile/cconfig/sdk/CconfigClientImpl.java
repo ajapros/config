@@ -4,10 +4,10 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.chenile.base.exception.ConfigurationException;
+import org.chenile.cconfig.model.Cconfig;
 import org.chenile.cconfig.sdk.cache.MemoryCache;
 import org.chenile.cconfig.service.CconfigRetriever;
 import org.chenile.core.context.ContextContainer;
-import org.chenile.cconfig.model.Cconfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +33,8 @@ public class CconfigClientImpl implements  CconfigClient{
     @Autowired
     MemoryCache memoryCache;
     /**
-     * Caches module file in memory. Avoids repeated reads from the file system for the module file.
+     * Caches module keys in cache. Avoids repeated reads and processing of the Module files and
+     * DB. Avoids repeated expensive SPEL evaluation.
      */
     private final Map<String,String> moduleCache = new HashMap<>();
     @Autowired
@@ -77,7 +78,7 @@ public class CconfigClientImpl implements  CconfigClient{
     /**
      * @param module name of the module
      * @return all the keys in the module. This includes all the keys in the JSON file (if found)
-     * and also the DB keys. 
+     * and also the DB keys.
      */
     private Map<String,Object> allKeysForModule(String module,String customAttribute) {
         Map<String,Object> allKeys = memoryCache.findJsonMap(module,customAttribute);
