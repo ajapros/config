@@ -2,9 +2,11 @@ package org.chenile.cconfig.configuration;
 
 import org.chenile.cconfig.sdk.CconfigClient;
 import org.chenile.cconfig.sdk.CconfigClientImpl;
+import org.chenile.cconfig.service.CconfigQueryService;
 import org.chenile.cconfig.service.CconfigRetriever;
 import org.chenile.cconfig.service.CconfigService;
 import org.chenile.cconfig.service.healthcheck.CconfigHealthChecker;
+import org.chenile.cconfig.service.impl.CconfigQueryServiceImpl;
 import org.chenile.cconfig.service.impl.CconfigServiceImpl;
 import org.chenile.cconfig.service.impl.DbBasedCconfigRetriever;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,8 +50,11 @@ public class CconfigConfiguration {
 	@Bean public CconfigClient serverCconfigClient(@Autowired @Qualifier("dbBasedCconfigRetriever") CconfigRetriever cconfigRetriever){
 		return new CconfigClientImpl(configPath,cconfigRetriever);
 	}
-	@Bean public CconfigService _cconfigService_(@Autowired @Qualifier("serverCconfigClient") CconfigClient client) {
-		return new CconfigServiceImpl(client);
+	@Bean public CconfigQueryService _cconfigQueryService_(@Autowired @Qualifier("serverCconfigClient") CconfigClient client) {
+		return new CconfigQueryServiceImpl(client);
+	}
+	@Bean public CconfigService _cconfigService_() {
+		return new CconfigServiceImpl();
 	}
 	@Bean CconfigHealthChecker cconfigHealthChecker(){
     	return new CconfigHealthChecker();

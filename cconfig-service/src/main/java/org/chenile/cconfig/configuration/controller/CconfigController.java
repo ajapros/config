@@ -14,21 +14,6 @@ import java.util.Map;
 		healthCheckerName = "cconfigHealthChecker")
 public class CconfigController extends ControllerSupport{
 
-    @GetMapping("/config/{module}")
-    public ResponseEntity<GenericResponse<Map<String,Object>>> getAllKeys(
-            HttpServletRequest httpServletRequest,
-            @PathVariable("module") String module){
-        return process(httpServletRequest,module);
-    }
-
-    @GetMapping("/config/{module}/{key}")
-    public ResponseEntity<GenericResponse<Map<String,Object>>> value(
-            HttpServletRequest httpServletRequest,
-            @PathVariable("module") String module,
-            @PathVariable("key") String key){
-        return process(httpServletRequest,module,key);
-    }
-
     @PostMapping("/cconfig")
     public ResponseEntity<GenericResponse<Cconfig>> save(
         HttpServletRequest httpServletRequest,
