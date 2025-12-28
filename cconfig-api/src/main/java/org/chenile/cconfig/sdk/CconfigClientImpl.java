@@ -45,26 +45,10 @@ public class CconfigClientImpl implements  CconfigClient{
         this.cconfigRetriever = retriever;
     }
 
-    private String module(String key){
-        if (key == null) return null;
-        int index = key.lastIndexOf('.');
-        if (index == -1) return key;
-        return key.substring(0,index);
-    }
-
-    private String key(String key){
-        if (key == null) return null;
-        int index = key.lastIndexOf('.');
-        if (index == -1) return null;
-        return key.toLowerCase().substring(index+1);
-    }
-
     @Override
-    public Object value(String k){
-        String mod = module(k);
-        String key = key(k);
-        Map<String,Object> jsonMap  = allKeysForModule(mod,customizationAttribute());
-        return (key == null || key.isEmpty())? jsonMap : jsonMap.get(key);
+    public Map<String,Object> value(String module,String key){
+        Map<String,Object> jsonMap  = allKeysForModule(module,customizationAttribute());
+        return (key == null || key.isEmpty())? jsonMap : new HashMap<>(Map.of(key,jsonMap.get(key)));
     }
 
     @SuppressWarnings("unchecked")

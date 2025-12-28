@@ -4,9 +4,10 @@ import java.util.Map;
 
 public interface CconfigClient {
     /**
+     * @param module - the module under which the key is defined. Modules can be nested.
      * @param key - the key for which value is desired.
      * @return the value for the key.
-     * Key is of the form {module name}.key. If only module name is specified, then all keys
+     * If key is null and only module name is specified, then all keys
      * for module will be returned. Key value can be string or a map.<br/>
      * If a module is specified it will be a map with all the keys as keys of the map. The
      * value can be strings or map depending on how the value was defined in the JSON file
@@ -29,5 +30,5 @@ public interface CconfigClient {
      * It is assumed that DB records don't alter the same path. If they do so, the result is indeterminate.
      *
      */
-    public Object value(String key);
+    public Map<String,Object> value(String module, String key);
 }

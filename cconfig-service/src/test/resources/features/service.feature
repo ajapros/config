@@ -153,49 +153,48 @@ Feature: Tests the Chenile Config Service using a REST client.
   Scenario: Get the value for "key1" for tenant0. This tests simple values being set
     Given that "entity" equals "config"
     And I construct a REST request with header "x-chenile-tenant-id" and value "tenant0"
-    And I GET a REST request to URL "/${entity}/ctest.key1"
+    And I GET a REST request to URL "/${entity}/ctest/key1"
     Then success is true
-    And the value of "$.payload" is "value2"
+    And the REST response key "key1" is "value2"
 
   Scenario: Get the value for "key2". This tests setting complex JSONs.
     This tests non-conflicting updates performed for __GLOBAL__ and tenant0.
     Both the updates must be reflected for tenant0
     Given that "entity" equals "config"
     And I construct a REST request with header "x-chenile-tenant-id" and value "tenant0"
-    And I GET a REST request to URL "/${entity}/ctest.key2"
+    And I GET a REST request to URL "/${entity}/ctest/key2"
     Then success is true
-    And the REST response key "abc" is "456"
-    And the REST response key "def" is "777"
-    And the REST response key "fields.field1.range[0]" is "1"
-    And the REST response key "fields.field1.range[1]" is "101"
-    And the REST response key "fields.field2.range[0]" is "2"
-    And the REST response key "fields.field2.range[1]" is "200"
+    And the REST response key "key2.abc" is "456"
+    And the REST response key "key2.def" is "777"
+    And the REST response key "key2.fields.field1.range[0]" is "1"
+    And the REST response key "key2.fields.field1.range[1]" is "101"
+    And the REST response key "key2.fields.field2.range[0]" is "2"
+    And the REST response key "key2.fields.field2.range[1]" is "200"
 
-  Scenario: Get the value for "key2". This tests setting complex JSONs.
-  This tests updates performed for __GLOBAL__
+  Scenario: Get the value for "key2" for tenant1. This tests updates performed for __GLOBAL__
     Given that "entity" equals "config"
     And I construct a REST request with header "x-chenile-tenant-id" and value "tenant1"
-    And I GET a REST request to URL "/${entity}/ctest.key2"
+    And I GET a REST request to URL "/${entity}/ctest/key2"
     Then success is true
-    And the REST response key "abc" is "123"
-    And the REST response does not contain key "def"
-    And the REST response key "fields.field1.range[0]" is "1"
-    And the REST response key "fields.field1.range[1]" is "100"
-    And the REST response key "fields.field2.range[0]" is "2"
-    And the REST response key "fields.field2.range[1]" is "200"
+    And the REST response key "key2.abc" is "123"
+    And the REST response does not contain key "key2.def"
+    And the REST response key "key2.fields.field1.range[0]" is "1"
+    And the REST response key "key2.fields.field1.range[1]" is "100"
+    And the REST response key "key2.fields.field2.range[0]" is "2"
+    And the REST response key "key2.fields.field2.range[1]" is "200"
 
   Scenario: Get the value for "key3" - this tests sub modules.
     Given that "entity" equals "config"
     And I construct a REST request with header "x-chenile-tenant-id" and value "tenant0"
-    And I GET a REST request to URL "/${entity}/ctest1.ctest1.key3"
+    And I GET a REST request to URL "/${entity}/ctest1.ctest1/key3"
     Then success is true
-    And the REST response key "some_name" is "some_other_value"
+    And the REST response key "key3.some_name" is "some_other_value"
 
-  Scenario: Get the value for "key1" for non tenant0. This tests __GLOBAL__
+  Scenario: Get the value for "key1" for non tenant0. This tests __GLOBAL__ for value replacement at the DB level
     Given that "entity" equals "config"
-    And I GET a REST request to URL "/${entity}/ctest.key1"
+    And I GET a REST request to URL "/${entity}/ctest/key1"
     Then success is true
-    And the value of "$.payload" is "value5"
+    And the REST response key "key1" is "value5"
 
   Scenario: Get all the keys and values for module ctest for tenant0. This checks if all keys are being returned.
     Given that "entity" equals "config"
@@ -215,25 +214,27 @@ Feature: Tests the Chenile Config Service using a REST client.
   Scenario: Get the value for "key4" tenant0. This tests introducing new keys in the DB for tenant0
     Given that "entity" equals "config"
     And I construct a REST request with header "x-chenile-tenant-id" and value "tenant0"
-    And I GET a REST request to URL "/${entity}/ctest.key4"
+    And I GET a REST request to URL "/${entity}/ctest/key4"
     Then success is true
-    And the value of "$.payload" is "value4"
+    And the REST response key "key4" is "value4"
 
   Scenario: Get the value for "key5" non tenant0. This tests introducing new keys in the DB for __GLOBAL__
     Given that "entity" equals "config"
-    And I GET a REST request to URL "/${entity}/ctest.key5"
+    And I GET a REST request to URL "/${entity}/ctest/key5"
     Then success is true
-    And the value of "$.payload" is "value5"
+    And the REST response key "key5" is "value5"
 
   Scenario: Get the value for "key5" tenant8. This tests introducing new keys in the DB for __GLOBAL__
     Given that "entity" equals "config"
     And I construct a REST request with header "x-chenile-tenant-id" and value "tenant8"
-    And I GET a REST request to URL "/${entity}/ctest.key5"
+    And I GET a REST request to URL "/${entity}/ctest/key5"
     Then success is true
-    And the value of "$.payload" is "value5"
+    And the REST response key "key5" is "value5"
 
-  Scenario: Get the value for "key20". This tests introducing new module in DB without corresponding JSON
+  Scenario: Get the value for "key20" in module "ctest20".
+  This tests introducing new module in DB without corresponding JSON
     Given that "entity" equals "config"
-    And I GET a REST request to URL "/${entity}/ctest20.key20"
+    And I GET a REST request to URL "/${entity}/ctest20/key20"
     Then success is true
-    And the value of "$.payload" is "value20"
+    And the REST response key "key20" is "value20"
+
