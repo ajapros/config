@@ -237,3 +237,12 @@ Feature: Tests the Chenile Config Service using a REST client.
     Then success is true
     And the REST response key "key20" is "value20"
 
+  Scenario: Get the value for a non existent module
+    Given that "entity" equals "config"
+    And I GET a REST request to URL "/${entity}/ctest29"
+    Then success is true
+
+  Scenario: Get the value for a non existent module and key
+    Given that "entity" equals "config"
+    And I GET a REST request to URL "/${entity}/ctest29/key29"
+    Then success is true
