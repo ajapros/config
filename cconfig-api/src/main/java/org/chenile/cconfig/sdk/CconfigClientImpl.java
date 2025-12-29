@@ -26,7 +26,7 @@ import java.util.Map;
 
 /**
  * The default implementation of the {@link CconfigClient} interface. This uses a CconfigRetriever to
- * get multiple Cconfigs that allow the default value to be mutated. 
+ * get multiple Cconfigs that allow the default value to be mutated.
  */
 public class CconfigClientImpl implements  CconfigClient{
     private static final Logger logger = LoggerFactory.getLogger(CconfigClientImpl.class);
