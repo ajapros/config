@@ -1,7 +1,15 @@
 Feature: Tests the Chenile Config Service using a REST client.
-  Chenile Config must be able to store the incremental updates in a DB.
-  It must return the value for one key which can be either a string or a JSON.
-  All values will be mutated by the DB records for select requests.
+  Chenile Config service can accept new keys to be added or an existing key's value
+  to be modified in either its entirety or parts of it.
+  Chenile Config must be able to store the incremental updates for keys in a DB.
+  It must be able to retrieve the key from the DB and add incremental updates to it from the DB records.
+  It must return the value for one key or all keys in a JSON. The returned value will be JSON with
+  keys as first level elements and the values (either a string or an entire sub JSON) in the second element.
+  We will test both the /cconfig and /config URLs.
+  /cconfig (POST) allows us to add new DB records for keys in a module
+  /cconfig (GET) allows us to retrieve the DB record that has been stored by the UUID
+  /config/module retrieves all the keys and values for a module
+  /config/module/key retrieves the value of a specific key that belongs to a module.
 
   Scenario: Save the overriding cconfig for a string key for tenant0.
     When I POST a REST request to URL "/cconfig" with payload
