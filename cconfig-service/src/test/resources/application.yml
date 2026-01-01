@@ -1,4 +1,6 @@
 chenile:
+  base:
+    url:
   config:
     path: "org/chenile/cconfig/test"
 

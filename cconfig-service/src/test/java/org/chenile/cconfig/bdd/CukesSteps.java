@@ -1,14 +1,15 @@
 package org.chenile.cconfig.bdd;
 
-import cucumber.api.java.en.Then;
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
+import io.cucumber.spring.CucumberContextConfiguration;
 import org.chenile.cconfig.SpringTestConfig;
 import org.chenile.cucumber.CukesContext;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.context.ActiveProfiles;
 
-import cucumber.api.java.en.Given;
 import org.springframework.test.web.servlet.ResultActions;
 
 import static org.chenile.cucumber.VariableHelper.substituteVariables;
@@ -25,6 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 */
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT,classes = SpringTestConfig.class)
 @AutoConfigureMockMvc
+@CucumberContextConfiguration
 @ActiveProfiles("unittest")
 public class CukesSteps {
 	CukesContext context = CukesContext.CONTEXT;
