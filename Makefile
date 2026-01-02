@@ -118,6 +118,12 @@ delete-origin-tag: check-tag
 delete-local-tag: check-tag
 	git tag -d $(tag)
 
+## push-tags: Push all tags from local to origin
+.PHONY: push-tags
+push-tags: 
+	git push --tags origin 
+
+
 ## help: type for getting this help
 .PHONY: help
 help: Makefile
