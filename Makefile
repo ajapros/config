@@ -14,7 +14,8 @@
 # this of course means that SNAPSHOT releases are flaky since we dont have tags to make them
 # predictable
 
-export version := $(shell git describe --tag --abbrev=0 2> /dev/null)
+# export version := $(shell git describe --tag --abbrev=0 2> /dev/null)
+export version := $(shell cat chenile-config-version.txt)
 .DEFAULT_GOAL := help
 ifndef version
 	override version = 0.0.1-SNAPSHOT
