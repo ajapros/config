@@ -29,13 +29,5 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @CucumberContextConfiguration
 @ActiveProfiles("unittest")
 public class CukesSteps {
-	CukesContext context = CukesContext.CONTEXT;
 	@Given("dummy") public void dummy(){}
-
-	@Then("the value of {string} is {string}")
-	public void the_value_of_is(String key, String value) throws Exception{
-		ResultActions response = context.get("actions");
-		response.andExpect(jsonPath(key).
-				value(substituteVariables(value)));
-	}
 }
