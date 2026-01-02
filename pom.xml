@@ -20,11 +20,6 @@
 	<groupId>org.chenile.cconfig</groupId>
 	<version>${revision}</version>
 	<artifactId>cconfig-parent</artifactId>
-	<name>Chenile cconfig </name>
-	<description>Modules execution project and Parent Pom</description>
-
-	<dependencyManagement>
-
-	</dependencyManagement>
-
+	<name>Chenile config</name>
+	<description>Chenile Configuration Management</description>
 </project>

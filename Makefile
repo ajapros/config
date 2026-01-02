@@ -35,7 +35,7 @@ test-script:
 ## deploy: Deploys the executable with the version extracted from GIT
 .PHONY: deploy
 deploy:
-	mvn -Drevision=$(version) deploy
+	mvn  -B -DskipTests -Drevision=$(version) -DperformRelease=true -Dgpg.passphrase="${passphrase}" deploy
 
 
 ## clean: Clean all previous builds
