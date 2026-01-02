@@ -1,19 +1,12 @@
 package org.chenile.cconfig.bdd;
 
 import io.cucumber.java.en.Given;
-import io.cucumber.java.en.Then;
 import io.cucumber.spring.CucumberContextConfiguration;
 import org.chenile.cconfig.SpringTestConfig;
-import org.chenile.cucumber.CukesContext;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.context.ActiveProfiles;
-
-import org.springframework.test.web.servlet.ResultActions;
-
-import static org.chenile.cucumber.VariableHelper.substituteVariables;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 
 /**

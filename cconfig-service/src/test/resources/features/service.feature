@@ -234,6 +234,12 @@ Feature: Tests the Chenile Config Service using a REST client.
     Then success is true
     And the REST response key "key20" is "value20"
 
+  Scenario: Get the value for "key8" in module "ctest8".
+  This tests having a module in JSON without having it in DB
+    When I GET a REST request to URL "/config/ctest8/key8"
+    Then success is true
+    And the REST response key "key8" is "value8"
+
   Scenario: Get the value for a non existent module
     When  I GET a REST request to URL "/config/ctest29"
     Then success is true

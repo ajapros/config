@@ -52,22 +52,12 @@ public class CconfigClientImpl implements  CconfigClient{
     @Override
     public Map<String,Object> value(String module,String key){
         Map<String,Object> jsonMap  = allKeysForModule(module,customizationAttribute());
-        if (key != null && !jsonMap.containsKey(key)){
+        if(key == null || key.isEmpty())
+            return jsonMap;
+        else if (jsonMap.containsKey(key))
+            return new HashMap<>(Map.of(key,jsonMap.get(key)));
+        else
             return new HashMap<>();
-        }
-        return (key == null || key.isEmpty())? jsonMap : new HashMap<>(Map.of(key,jsonMap.get(key)));
-    }
-
-    /**
-     * @param module the module that needs to be read from the class path
-     * @return all the module keys as JSON.
-     */
-    @SuppressWarnings("unchecked")
-    private Map<String,Object> getJsonMapForModuleFromClassPath(String module){
-        String s = readModuleAsString(module);
-        if (s == null)
-            return new LinkedHashMap<>();
-        return (Map<String,Object>)objectify(s);
     }
 
     /**
@@ -84,6 +74,7 @@ public class CconfigClientImpl implements  CconfigClient{
         Map<String,Object> jsonMap = getJsonMapForModuleFromClassPath(module);
         List<Cconfig> dbList = cconfigRetriever.findAllKeysForModule(module,customAttribute);
         if (dbList == null || dbList.isEmpty()){
+            if (jsonMap == null) jsonMap = new HashMap<>();
             memoryCache.save(module,customAttribute,jsonMap);
             return jsonMap;
         }
@@ -104,6 +95,17 @@ public class CconfigClientImpl implements  CconfigClient{
         }
         memoryCache.save(module,customAttribute,allKeys);
         return allKeys;
+    }
+    /**
+     * @param module the module that needs to be read from the class path
+     * @return all the module keys as JSON.
+     */
+    @SuppressWarnings("unchecked")
+    private Map<String,Object> getJsonMapForModuleFromClassPath(String module){
+        String s = readModuleAsString(module);
+        if (s == null)
+            return new LinkedHashMap<>();
+        return (Map<String,Object>)objectify(s);
     }
 
     /**
