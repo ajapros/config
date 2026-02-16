@@ -13,6 +13,4 @@ public class CconfigApiConfiguration {
     public MemoryCache memoryCache(){
         return new MemoryCache();
     }
-
-
 }

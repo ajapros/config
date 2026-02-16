@@ -128,6 +128,11 @@ Feature: Tests the Chenile Config Service using a REST client.
     When I GET a REST request to URL "/cconfig/${id}"
     Then success is true
     And the REST response key "id" is "${id}"
+    And the REST response key "moduleName" is "ctest1.ctest1"
+    And the REST response key "keyName" is "key3"
+    And the REST response key "avalue" is "some_other_value"
+    And the REST response key "path" is "some_name"
+    And the REST response key "customAttribute" is "tenant0"
 
   Scenario: Save a cconfig using an ID that already is determined
     Given that "id" equals "123"
@@ -135,6 +140,7 @@ Feature: Tests the Chenile Config Service using a REST client.
   """json
   {
     "id": "${id}",
+    "moduleName": "m1",
     "keyName": "key3",
     "avalue": "456",
     "path": "key2.abc",
@@ -148,6 +154,11 @@ Feature: Tests the Chenile Config Service using a REST client.
     When I GET a REST request to URL "/cconfig/${id}"
     Then success is true
     And the REST response key "id" is "${id}"
+    And the REST response key "moduleName" is "m1"
+    And the REST response key "keyName" is "key3"
+    And the REST response key "avalue" is "456"
+    And the REST response key "path" is "key2.abc"
+    And the REST response key "customAttribute" is "tenant0"
 
   Scenario: Get the value for "key1" for tenant0. This tests simple values being set
     When I construct a REST request with header "x-chenile-tenant-id" and value "tenant0"
@@ -243,7 +254,9 @@ Feature: Tests the Chenile Config Service using a REST client.
   Scenario: Get the value for a non existent module
     When  I GET a REST request to URL "/config/ctest29"
     Then success is true
+    And the REST response is empty
 
   Scenario: Get the value for a non existent module and key
     When I GET a REST request to URL "/config/ctest29/key29"
     Then success is true
+    And the REST response is empty

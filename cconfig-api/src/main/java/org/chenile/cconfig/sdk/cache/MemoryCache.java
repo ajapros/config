@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Provides a hashmap as a read through cache.
+ * Provides a hashmap.
  * Replace with proper cache with TTL if it is desired to change the attributes frequently
  */
 public class MemoryCache {

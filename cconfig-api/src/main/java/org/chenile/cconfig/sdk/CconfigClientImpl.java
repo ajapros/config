@@ -36,11 +36,6 @@ public class CconfigClientImpl implements  CconfigClient{
     private final CconfigRetriever cconfigRetriever;
     @Autowired
     MemoryCache memoryCache;
-    /**
-     * Caches module keys in cache. Avoids repeated reads and processing of the Module files and
-     * DB. Avoids repeated expensive SPEL evaluation.
-     */
-    private final Map<String,String> moduleCache = new HashMap<>();
     @Autowired
     ContextContainer contextContainer;
 
@@ -74,7 +69,6 @@ public class CconfigClientImpl implements  CconfigClient{
         Map<String,Object> jsonMap = getJsonMapForModuleFromClassPath(module);
         List<Cconfig> dbList = cconfigRetriever.findAllKeysForModule(module,customAttribute);
         if (dbList == null || dbList.isEmpty()){
-            if (jsonMap == null) jsonMap = new HashMap<>();
             memoryCache.save(module,customAttribute,jsonMap);
             return jsonMap;
         }
@@ -123,8 +117,6 @@ public class CconfigClientImpl implements  CconfigClient{
      * @return the module as a string or null if such a file does not exist
      */
     private String readModuleAsString(String module) {
-        String s = moduleCache.get(module);
-        if (s != null) return s;
         String modPath = configPath + "/" + module.replaceAll("\\.","/") + ".json";
         logger.debug("Finding the JSON file for {}",modPath);
 
@@ -132,9 +124,7 @@ public class CconfigClientImpl implements  CconfigClient{
             if(stream == null){
                 return null;
             }
-            s = new String(stream.readAllBytes(), StandardCharsets.UTF_8);
-            moduleCache.put(module,s);
-            return s;
+            return new String(stream.readAllBytes(), StandardCharsets.UTF_8);
         }catch(Exception e){
             throw new ConfigurationException(1700,"Cconfig:Cannot read module " + module,e);
         }
