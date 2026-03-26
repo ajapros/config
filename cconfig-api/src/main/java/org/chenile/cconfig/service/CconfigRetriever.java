@@ -14,4 +14,10 @@ public interface CconfigRetriever {
      * @return all values that match the combination and also for __GLOBAL__
      */
     List<Cconfig> findAllKeysForModule(String module,String customAttribute);
+    // increasing order of precedence. All ConfigRetrievers will be chosen from the lowest to the highest.
+    // Higher precedence ones can modify the values set by the ones with lower precedence
+    // by default it will have the lowest order.
+    default int order() {
+        return 0;
+    }
 }

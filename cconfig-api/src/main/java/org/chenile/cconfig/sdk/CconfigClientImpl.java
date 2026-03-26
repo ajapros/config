@@ -148,6 +148,8 @@ public class CconfigClientImpl implements  CconfigClient{
     }
 
     /**
+     * Convert the path expression from form "a.b.c" to ['a']['b']['c'] as supported by SPEL for maps.
+     * Note that even if expression contains indexes this handles it. Example: a.0.xyz becomes ['a']['0']['xyz']
      * @param p the path defined in the database
      * @return the expression in a form that is amenable to be used as a SPEL expression for maps
      */
