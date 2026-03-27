@@ -1,9 +1,10 @@
 package org.chenile.cconfig.configuration;
 
 import org.chenile.cconfig.sdk.CconfigClient;
-import org.chenile.cconfig.sdk.CconfigClientImpl;
+import org.chenile.cconfig.sdk.impl.CconfigClientImpl;
 import org.chenile.cconfig.service.CconfigQueryService;
-import org.chenile.cconfig.service.CconfigRetriever;
+import org.chenile.cconfig.spi.CconfigRetriever;
+import org.chenile.cconfig.spi.CconfigRetrieverFactory;
 import org.chenile.cconfig.service.CconfigService;
 import org.chenile.cconfig.service.healthcheck.CconfigHealthChecker;
 import org.chenile.cconfig.service.impl.CconfigQueryServiceImpl;
@@ -43,12 +44,12 @@ public class CconfigConfiguration {
 	@Value("${chenile.config.customAttributes:}")
 	private List<String> customAttributes;
 
-	@Bean public CconfigRetriever dbBasedCconfigRetriever(){
-		return new DbBasedCconfigRetriever();
+	@Bean public CconfigRetriever dbBasedCconfigRetriever(@Autowired CconfigRetrieverFactory cconfigRetrieverFactory){
+		return new DbBasedCconfigRetriever(cconfigRetrieverFactory);
 	}
 
-	@Bean public CconfigClient serverCconfigClient(@Autowired @Qualifier("dbBasedCconfigRetriever") CconfigRetriever cconfigRetriever){
-		return new CconfigClientImpl(configPath,cconfigRetriever);
+	@Bean public CconfigClient serverCconfigClient(@Autowired CconfigRetrieverFactory cconfigRetrieverFactory){
+		return new CconfigClientImpl(configPath,cconfigRetrieverFactory);
 	}
 	@Bean public CconfigQueryService _cconfigQueryService_(@Autowired @Qualifier("serverCconfigClient") CconfigClient client) {
 		return new CconfigQueryServiceImpl(client);
