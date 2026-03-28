@@ -6,6 +6,7 @@
 	<modules>
 		<module>chenile-config</module>
 		<module>cconfig-db</module>
+		<module>cconfig-tests</module>
 	</modules>
 	<parent>
 		<groupId>org.chenile</groupId>
