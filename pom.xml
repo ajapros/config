@@ -4,8 +4,8 @@
 	<modelVersion>4.0.0</modelVersion>
 	<packaging>pom</packaging>
 	<modules>
-		<module>cconfig-api</module>
-		<module>cconfig-service</module>
+		<module>chenile-config</module>
+		<module>cconfig-db</module>
 	</modules>
 	<parent>
 		<groupId>org.chenile</groupId>

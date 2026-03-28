@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<flows>
+    <flow>
+        <chain>
+            <json-based-cconfig-retriever/>
+            <db-based-cconfig-retriever/>
+            <properties-based-cconfig-retriever/>
+            <message-bundle-config-retriever/>
+            <env-based-cconfig-retriever/>
+        </chain>
+    </flow>
+</flows>
