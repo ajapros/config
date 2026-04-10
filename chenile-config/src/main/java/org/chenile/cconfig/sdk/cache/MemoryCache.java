@@ -8,14 +8,14 @@ import java.util.Map;
  * Replace with proper cache with TTL if it is desired to change the attributes frequently
  */
 public class MemoryCache {
-    private final Map<CconfigKey,Map<String,Object>> configMap = new HashMap<>();
+    private final Map<ConfigCacheKey,Map<String,Object>> configMap = new HashMap<>();
 
     public void save(String module,String customAttribute, Map<String,Object> jsonMap){
-        configMap.put(new CconfigKey(module,customAttribute),jsonMap);
+        configMap.put(new ConfigCacheKey(module,customAttribute),jsonMap);
     }
 
     public Map<String,Object> findJsonMap(String module, String customAttribute) {
-        CconfigKey ckey = new CconfigKey(module,customAttribute);
+        ConfigCacheKey ckey = new ConfigCacheKey(module,customAttribute);
         return configMap.get(ckey);
     }
 }

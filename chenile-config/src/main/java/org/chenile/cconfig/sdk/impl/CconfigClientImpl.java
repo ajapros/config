@@ -19,8 +19,8 @@ public class CconfigClientImpl implements  CconfigClient{
     private final OrchExecutor<ConfigContext> orchExecutor;
     @Autowired
     MemoryCache memoryCache;
-    @Autowired
-    ContextContainer contextContainer;
+    //@Autowired
+   // ContextContainer contextContainer;
 
     public CconfigClientImpl(OrchExecutor<ConfigContext> orchExecutor) {
         this.orchExecutor = orchExecutor;
@@ -64,6 +64,6 @@ public class CconfigClientImpl implements  CconfigClient{
      * the tenant ID header.
      */
     protected String customizationAttribute(){
-        return contextContainer.getHeader("chenile-tenant-id");
+        return ContextContainer.getHeader("chenile-tenant-id");
     }
 }
