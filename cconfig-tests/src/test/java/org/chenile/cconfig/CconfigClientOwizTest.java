@@ -158,7 +158,6 @@ public class CconfigClientOwizTest {
     private CconfigClientImpl client(OrchExecutor<ConfigContext> orchExecutor) throws Exception {
         CconfigClientImpl client = new CconfigClientImpl(orchExecutor);
         setField(client, "memoryCache", new MemoryCache());
-        setField(client, "contextContainer", ContextContainer.CONTEXT_CONTAINER);
         return client;
     }
 

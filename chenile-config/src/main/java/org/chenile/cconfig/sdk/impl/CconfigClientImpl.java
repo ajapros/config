@@ -64,6 +64,6 @@ public class CconfigClientImpl implements  CconfigClient{
      * the tenant ID header.
      */
     protected String customizationAttribute(){
-        return ContextContainer.getHeader("chenile-tenant-id");
+        return ContextContainer.CONTEXT_CONTAINER.getHeader("chenile-tenant-id");
     }
 }
