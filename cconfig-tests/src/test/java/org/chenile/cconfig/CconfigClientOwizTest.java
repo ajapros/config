@@ -1,5 +1,6 @@
 package org.chenile.cconfig;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import org.chenile.cconfig.model.Cconfig;
 import org.chenile.cconfig.sdk.cache.MemoryCache;
 import org.chenile.cconfig.sdk.impl.CconfigClientImpl;
@@ -20,9 +21,11 @@ import org.junit.Test;
 import org.springframework.mock.env.MockEnvironment;
 
 import java.lang.reflect.Field;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class CconfigClientOwizTest {
     @After
@@ -140,6 +143,92 @@ public class CconfigClientOwizTest {
         Assert.assertEquals("Bienvenue Client", welcome.get("fr"));
     }
 
+    @Test
+    public void typedReadConvertsNestedJsonToPojo() throws Exception {
+        OrchExecutor<ConfigContext> orchExecutor = orchExecutor(Map.of(
+                "jsonBasedCconfigRetriever", new JsonBasedCconfigRetriever("org/chenile/cconfig/test")
+        ), "org/chenile/cconfig/test/owiz/json-only-orch.xml");
+
+        CconfigClientImpl client = client(orchExecutor);
+
+        Key2Value key2 = client.value("ctest", "key2", Key2Value.class);
+
+        Assert.assertEquals("123", key2.abc);
+        Assert.assertEquals(Integer.valueOf(1), key2.fields.field1.range.get(0));
+        Assert.assertEquals(Integer.valueOf(100), key2.fields.field1.range.get(1));
+    }
+
+    @Test
+    public void typedReadCanConvertWholeModuleUsingTypeReference() throws Exception {
+        OrchExecutor<ConfigContext> orchExecutor = orchExecutor(Map.of(
+                "jsonBasedCconfigRetriever", new JsonBasedCconfigRetriever("org/chenile/cconfig/test")
+        ), "org/chenile/cconfig/test/owiz/json-only-orch.xml");
+
+        CconfigClientImpl client = client(orchExecutor);
+
+        Map<String, Object> values = client.value("ctest", null, new TypeReference<Map<String, Object>>() { });
+
+        Assert.assertEquals("value1", values.get("key1"));
+        Assert.assertTrue(values.containsKey("key2"));
+    }
+
+    @Test
+    public void wholeKeyOverrideCanDeserializeJsonArrayFromStringValue() throws Exception {
+        OrchExecutor<ConfigContext> orchExecutor = orchExecutor(Map.of(
+                "jsonBasedCconfigRetriever", new JsonBasedCconfigRetriever("org/chenile/cconfig/test"),
+                "stubRetrieverSingle", new StubRetriever(List.of(
+                        cconfig("ctest", "key2", "[{\"range\":[5,6]},{\"range\":[7,8]}]", "tenant0", null)
+                ))
+        ), "org/chenile/cconfig/test/owiz/single-orch.xml");
+
+        CconfigClientImpl client = client(orchExecutor);
+        ContextContainer.CONTEXT_CONTAINER.put("x-chenile-tenant-id", "tenant0");
+
+        Map<String, Object> values = client.value("ctest", "key2");
+
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> key2 = (List<Map<String, Object>>) values.get("key2");
+        @SuppressWarnings("unchecked")
+        List<Integer> firstRange = (List<Integer>) key2.get(0).get("range");
+        @SuppressWarnings("unchecked")
+        List<Integer> secondRange = (List<Integer>) key2.get(1).get("range");
+
+        Assert.assertEquals(List.of(5, 6), firstRange);
+        Assert.assertEquals(List.of(7, 8), secondRange);
+    }
+
+    @Test
+    public void cacheReturnsCachedValueBeforeTtlExpires() throws Exception {
+        AtomicInteger counter = new AtomicInteger();
+        CconfigClientImpl client = client(orchExecutor(Map.of(
+                "jsonBasedCconfigRetriever", new JsonBasedCconfigRetriever("org/chenile/cconfig/test"),
+                "stubRetrieverSingle", new CountingRetriever(counter)
+        ), "org/chenile/cconfig/test/owiz/single-orch.xml"), Duration.ofSeconds(1));
+        ContextContainer.CONTEXT_CONTAINER.put("x-chenile-tenant-id", "tenant0");
+
+        client.value("ctest", null);
+        client.value("ctest", null);
+
+        Assert.assertEquals(1, counter.get());
+    }
+
+    @Test
+    public void cacheReloadsAfterTtlExpires() throws Exception {
+        AtomicInteger counter = new AtomicInteger();
+        CconfigClientImpl client = client(orchExecutor(Map.of(
+                "jsonBasedCconfigRetriever", new JsonBasedCconfigRetriever("org/chenile/cconfig/test"),
+                "stubRetrieverSingle", new CountingRetriever(counter)
+        ), "org/chenile/cconfig/test/owiz/single-orch.xml"), Duration.ofMillis(25));
+        ContextContainer.CONTEXT_CONTAINER.put("x-chenile-tenant-id", "tenant0");
+
+        Map<String, Object> first = client.value("ctest", null);
+        Thread.sleep(60);
+        Map<String, Object> second = client.value("ctest", null);
+
+        Assert.assertEquals(2, counter.get());
+        Assert.assertNotEquals(first.get("counter"), second.get("counter"));
+    }
+
     private OrchExecutor<ConfigContext> orchExecutor(Map<String, Command<ConfigContext>> commands, String filename) throws Exception {
         XmlOrchConfigurator<ConfigContext> xmlOrchConfigurator = new XmlOrchConfigurator<>();
         Map<String, Command<ConfigContext>> commandMap = new HashMap<>(commands);
@@ -156,8 +245,12 @@ public class CconfigClientOwizTest {
     }
 
     private CconfigClientImpl client(OrchExecutor<ConfigContext> orchExecutor) throws Exception {
+        return client(orchExecutor, MemoryCache.DEFAULT_TTL);
+    }
+
+    private CconfigClientImpl client(OrchExecutor<ConfigContext> orchExecutor, Duration ttl) throws Exception {
         CconfigClientImpl client = new CconfigClientImpl(orchExecutor);
-        setField(client, "memoryCache", new MemoryCache());
+        setField(client, "memoryCache", new MemoryCache(ttl));
         return client;
     }
 
@@ -167,7 +260,7 @@ public class CconfigClientOwizTest {
         field.set(target, value);
     }
 
-    private Cconfig cconfig(String module, String key, String value, String customAttribute, String path) {
+    private static Cconfig cconfig(String module, String key, String value, String customAttribute, String path) {
         Cconfig cconfig = new Cconfig();
         cconfig.moduleName = module;
         cconfig.keyName = key;
@@ -191,5 +284,33 @@ public class CconfigClientOwizTest {
                             configContext.getCustomAttribute().equals(cc.customAttribute))
                     .toList();
         }
+    }
+
+    private static class CountingRetriever extends KeyManipulatingConfigRetriever {
+        private final AtomicInteger counter;
+
+        private CountingRetriever(AtomicInteger counter) {
+            this.counter = counter;
+        }
+
+        @Override
+        public List<Cconfig> retrieveCconfigs(ConfigContext configContext) {
+            int value = counter.incrementAndGet();
+            return List.of(cconfig(configContext.getModule(), "counter", String.valueOf(value),
+                    configContext.getCustomAttribute(), null));
+        }
+    }
+
+    public static class Key2Value {
+        public String abc;
+        public Fields fields;
+    }
+
+    public static class Fields {
+        public RangeHolder field1;
+    }
+
+    public static class RangeHolder {
+        public List<Integer> range;
     }
 }

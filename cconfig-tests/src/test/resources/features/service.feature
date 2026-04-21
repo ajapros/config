@@ -124,6 +124,32 @@ Feature: Tests the Chenile Config Service using a REST client.
     Then success is true
     And store "$.payload.id" from response to "id"
 
+  Scenario: Save a new key with a whole JSON object value stored as string
+    When I POST a REST request to URL "/cconfig" with payload
+    """JSON
+    {
+      "moduleName": "ctest",
+      "keyName": "key6",
+      "avalue": "{\"threshold\":10,\"flags\":{\"enabled\":true}}",
+      "customAttribute": "tenant-object"
+	}
+	"""
+    Then success is true
+    And store "$.payload.id" from response to "objectId"
+
+  Scenario: Save a new key with a whole JSON array value stored as string
+    When I POST a REST request to URL "/cconfig" with payload
+    """JSON
+    {
+      "moduleName": "ctest",
+      "keyName": "key7",
+      "avalue": "[{\"range\":[5,6]},{\"range\":[7,8]}]",
+      "customAttribute": "tenant-array"
+	}
+	"""
+    Then success is true
+    And store "$.payload.id" from response to "arrayId"
+
   Scenario: Retrieve the saved cconfig
     When I GET a REST request to URL "/cconfig/${id}"
     Then success is true
@@ -202,6 +228,22 @@ Feature: Tests the Chenile Config Service using a REST client.
     And I GET a REST request to URL "/config/ctest1.ctest1/key3"
     Then success is true
     And the REST response key "key3.some_name" is "some_other_value"
+
+  Scenario: Get the value for "key6". This tests whole JSON object values saved as strings in DB
+    When I construct a REST request with header "x-chenile-tenant-id" and value "tenant-object"
+    And I GET a REST request to URL "/config/ctest/key6"
+    Then success is true
+    And the REST response key "key6.threshold" is "10"
+    And the REST response key "key6.flags.enabled" is "true"
+
+  Scenario: Get the value for "key7". This tests whole JSON array values saved as strings in DB
+    When I construct a REST request with header "x-chenile-tenant-id" and value "tenant-array"
+    And I GET a REST request to URL "/config/ctest/key7"
+    Then success is true
+    And the REST response key "key7[0].range[0]" is "5"
+    And the REST response key "key7[0].range[1]" is "6"
+    And the REST response key "key7[1].range[0]" is "7"
+    And the REST response key "key7[1].range[1]" is "8"
 
   Scenario: Get the value for "key1" for non tenant0. This tests __GLOBAL__ for value replacement at the DB level
     When I GET a REST request to URL "/config/ctest/key1"

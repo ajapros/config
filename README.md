@@ -44,8 +44,74 @@ a "customAttribute". In a SaaS implementation, the customAttribute can be
 tenant ID. It can also be a combination of multiple request headers which can be considered as per
 the specific requirements of an installation.
 
+## Tenant File Discovery
+If a tenant-specific file exists, it replaces the base module JSON file for that tenant. The lookup order is:
+
+1. `<basePath>/<customAttribute>/<module>.json`
+2. `<basePath>/<module>.json`
+
+This replacement happens at the JSON file loading layer. The base JSON and tenant JSON are not merged together.
+Later retrievers such as DB, environment, or message-bundle retrievers can still apply overlays on top of the
+selected JSON file.
+
 ## Module Nesting
 As discussed above, all configurations belong to a module. Sub Modules are also supported. Sub modules
 are named in the format m1.m2 Where m1 is the parent module and m2 is the child module. Modules can be 
 arbitrarily nested. (i.e. you can have sub modules like m1.m2.m3.m4 etc.)
 
+## CconfigClient Usage
+`CconfigClient` can still be injected and used exactly as before:
+
+```java
+@Autowired
+CconfigClient cconfigClient;
+```
+
+The existing contract remains unchanged:
+
+```java
+Map<String,Object> keyValue = cconfigClient.value("ctest", "key2");
+Map<String,Object> allValues = cconfigClient.value("ctest", null);
+```
+
+Typed reads are also supported:
+
+```java
+MyPojo value = cconfigClient.value("ctest", "key2", MyPojo.class);
+List<MyPojo> listValue = cconfigClient.value(
+        "ctest",
+        "key7",
+        new TypeReference<List<MyPojo>>() { }
+);
+```
+
+If the requested type does not match the stored config shape, the client fails fast with a configuration exception.
+
+## JSON Object And Array Overrides From DB
+DB overrides are stored as strings, but when they contain JSON they are parsed back into structured values.
+
+- A JSON object string such as `{"a":1}` is returned as a `Map`
+- A JSON array string such as `[{"a":1}]` is returned as a `List`
+
+This applies both to:
+
+1. typed reads using `Class<T>` or `TypeReference<T>`
+2. plain `value(module, key)` reads, where the returned `Map<String,Object>` may contain a `Map` or `List` as the value
+
+For example, if `key7` is overridden in the DB with a JSON array string:
+
+```java
+Map<String,Object> value = cconfigClient.value("ctest", "key7");
+Object raw = value.get("key7"); // raw is a List, not a String
+```
+
+## Cache
+Resolved module values are cached in memory. The default cache TTL is 5 minutes.
+
+This can be overridden using:
+
+```properties
+chenile.config.cache-duration=PT5M
+```
+
+The value uses `Duration` format such as `PT30S`, `PT5M`, or `PT1H`.

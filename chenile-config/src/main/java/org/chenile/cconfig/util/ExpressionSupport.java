@@ -1,6 +1,5 @@
 package org.chenile.cconfig.util;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.chenile.cconfig.model.Cconfig;
@@ -108,17 +107,16 @@ public class ExpressionSupport {
     }
 
     /**
-     * Parses the string as JSON if applicable and returns the parsed string as map
+     * Parses the string as JSON if applicable and returns the parsed JSON object/list.
      * @param dbValue the value to objectify
-     * @return the string or map
+     * @return the string, map or list
      */
     private static Object objectify(String dbValue){
         dbValue = dbValue.trim();
         if (dbValue.startsWith("{") || dbValue.startsWith("[")){
             try {
                 JsonNode node = objectMapper.readTree(dbValue);
-                return objectMapper.convertValue(node,
-                        new TypeReference<Map<String, Object>>(){});
+                return objectMapper.convertValue(node, Object.class);
             }catch(Exception ignore){
                 // if this cannot be parsed as a JSON ignore it.
                 return dbValue;

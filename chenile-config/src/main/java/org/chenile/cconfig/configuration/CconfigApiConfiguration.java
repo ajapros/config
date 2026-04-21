@@ -10,6 +10,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 
+import java.time.Duration;
+
 @Configuration
 public class CconfigApiConfiguration {
     @Value("${chenile.config.path:org/chenile/config}")
@@ -18,9 +20,11 @@ public class CconfigApiConfiguration {
     private String resourceBundle;
     @Value("${chenile.config.properties.path:${chenile.config.path:org/chenile/config}}")
     private String propertiesPath;
+    @Value("${chenile.config.cache-duration:PT5M}")
+    private Duration cacheDuration;
     @Bean
     public MemoryCache memoryCache(){
-        return new MemoryCache();
+        return new MemoryCache(cacheDuration);
     }
 
     @Bean

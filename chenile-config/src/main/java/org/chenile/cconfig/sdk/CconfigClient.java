@@ -1,5 +1,8 @@
 package org.chenile.cconfig.sdk;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import org.chenile.cconfig.sdk.impl.CconfigTypeConverter;
+
 import java.util.Map;
 
 public interface CconfigClient {
@@ -26,4 +29,14 @@ public interface CconfigClient {
      *
      */
     public Map<String,Object> value(String module, String key);
+
+    default <T> T value(String module, String key, Class<T> targetType) {
+        Object rawValue = CconfigTypeConverter.extractRawValue(value(module, key), key);
+        return CconfigTypeConverter.convert(rawValue, targetType, module, key);
+    }
+
+    default <T> T value(String module, String key, TypeReference<T> targetType) {
+        Object rawValue = CconfigTypeConverter.extractRawValue(value(module, key), key);
+        return CconfigTypeConverter.convert(rawValue, targetType, module, key);
+    }
 }
