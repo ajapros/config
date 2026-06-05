@@ -61,7 +61,7 @@ public final class CconfigTypeConverter {
 
     private static ConfigurationException conversionException(String module, String key,
                                                               String targetType, Exception cause) {
-        return new ConfigurationException(1706,
+        return new ConfigurationException("1706",
                 "Cconfig:Cannot convert module %s key %s to %s"
                         .formatted(module, key, targetType), cause);
     }

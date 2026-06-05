@@ -58,7 +58,7 @@ public class PropertiesBasedCconfigRetriever extends KeyManipulatingConfigRetrie
             properties.load(inputStream);
             return properties;
         } catch (Exception e) {
-            throw new ConfigurationException(1704,
+            throw new ConfigurationException("1704",
                     "Cconfig:Cannot read properties resource " + resourceName + " under " + basePath, e);
         }
     }

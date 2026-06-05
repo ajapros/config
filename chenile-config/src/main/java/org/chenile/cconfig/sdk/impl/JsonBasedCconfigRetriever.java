@@ -41,7 +41,7 @@ public class JsonBasedCconfigRetriever implements Command<ConfigContext> {
         try {
             return objectMapper.readValue(s, new TypeReference<LinkedHashMap<String, Object>>() { });
         } catch (Exception e) {
-            throw new ConfigurationException(1701, "Cconfig:Cannot parse module " + configContext.getModule(), e);
+            throw new ConfigurationException("1701", "Cconfig:Cannot parse module " + configContext.getModule(), e);
         }
     }
 
@@ -64,7 +64,7 @@ public class JsonBasedCconfigRetriever implements Command<ConfigContext> {
             }
             return new String(stream.readAllBytes(), StandardCharsets.UTF_8);
         } catch (Exception e) {
-            throw new ConfigurationException(1700, "Cconfig:Cannot read module " + module, e);
+            throw new ConfigurationException("1700", "Cconfig:Cannot read module " + module, e);
         }
     }
 }

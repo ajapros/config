@@ -53,7 +53,7 @@ public class MessageBundleConfigRetriever implements Command<ConfigContext> {
             }
             return byKey;
         } catch (IOException e) {
-            throw new ConfigurationException(1703, "Cconfig:Cannot read message bundles " + resourceBundle, e);
+            throw new ConfigurationException("1703", "Cconfig:Cannot read message bundles " + resourceBundle, e);
         }
     }
 

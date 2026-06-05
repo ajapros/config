@@ -51,7 +51,7 @@ public class CconfigClientImpl implements  CconfigClient{
         try {
             orchExecutor.execute(configContext);
         } catch (Exception e) {
-            throw new ConfigurationException(1705,
+            throw new ConfigurationException("1705",
                     "Cconfig:Cannot execute config orchestration for module " + module, e);
         }
         memoryCache.save(module,customAttribute,configContext.allKeys);
