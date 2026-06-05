@@ -22,6 +22,6 @@ public class CconfigServiceImpl implements CconfigService{
     public Cconfig retrieve(String id) {
         Optional<Cconfig> entity = cconfigRepository.findById(id);
         if (entity.isPresent()) return entity.get();
-        throw new NotFoundException(1500,"Unable to find cconfig with ID " + id);
+        throw new NotFoundException("1500","Unable to find cconfig with ID " + id);
     }
 }
