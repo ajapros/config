@@ -7,8 +7,8 @@ import org.chenile.owiz.Command;
 import java.util.List;
 
 /**
- * This needs to be enhanced by all the config retrievers who want to allow manipulating existing keys.
- * They need to return a bunch of CConfigs - each with the intent if manipulating one key (there can be
+ * This needs to be inherited by all the config retrievers who want to allow manipulating existing keys.
+ * They need to return a bunch of CConfigs - each with the intent of manipulating one key (there can be
  * multiple CConfigs that manipulate the same key).
  * <p>The CConfig can replace an entire key or parts of it as specified in the {@link Cconfig#path}</p>
  * The expression language supported is SPEL. Others can also be used.

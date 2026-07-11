@@ -28,7 +28,7 @@ public class CconfigClientImpl implements  CconfigClient{
 
     @Override
     public Map<String,Object> value(String module,String key){
-        Map<String,Object> jsonMap  = allKeysForModule(module,customizationAttribute());
+        Map<String,Object> jsonMap  = allKeysForModule(module,customizationAttribute(),trajectoryId());
         if(key == null || key.isEmpty())
             return jsonMap;
         else if (jsonMap.containsKey(key))
@@ -42,19 +42,19 @@ public class CconfigClientImpl implements  CconfigClient{
      * @return all the keys in the module. This includes all the keys in the JSON file (if found)
      * and also the DB keys.
      */
-    private Map<String,Object> allKeysForModule(String module,String customAttribute) {
-        Map<String,Object> allKeys = memoryCache.findJsonMap(module,customAttribute);
+    private Map<String,Object> allKeysForModule(String module,String customAttribute, String trajectoryId) {
+        Map<String,Object> allKeys = memoryCache.findJsonMap(module,customAttribute,trajectoryId);
         if (allKeys != null) {
             return allKeys;
         }
-        ConfigContext configContext = new ConfigContext(module, customAttribute);
+        ConfigContext configContext = new ConfigContext(module, customAttribute,trajectoryId);
         try {
             orchExecutor.execute(configContext);
         } catch (Exception e) {
             throw new ConfigurationException("1705",
                     "Cconfig:Cannot execute config orchestration for module " + module, e);
         }
-        memoryCache.save(module,customAttribute,configContext.allKeys);
+        memoryCache.save(module,customAttribute,trajectoryId,configContext.allKeys);
         return configContext.allKeys;
     }
 
@@ -65,5 +65,9 @@ public class CconfigClientImpl implements  CconfigClient{
      */
     protected String customizationAttribute(){
         return ContextContainer.CONTEXT_CONTAINER.getHeader("chenile-tenant-id");
+    }
+
+    protected String trajectoryId(){
+        return ContextContainer.CONTEXT_CONTAINER.getHeader("chenile-trajectory-id");
     }
 }

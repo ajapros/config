@@ -18,7 +18,8 @@ Feature: Tests the Chenile Config Service using a REST client.
       "moduleName": "ctest",
       "keyName": "key1",
       "avalue": "value2",
-      "customAttribute": "tenant0"
+      "customAttribute": "tenant0",
+      "trajectoryId": "__GLOBAL__"
 	}
 	"""
     Then success is true
@@ -33,7 +34,8 @@ Feature: Tests the Chenile Config Service using a REST client.
       "moduleName": "ctest",
       "keyName": "key1",
       "avalue": "value5",
-      "customAttribute": "__GLOBAL__"
+      "customAttribute": "__GLOBAL__",
+      "trajectoryId": "__GLOBAL__"
 	}
 	"""
     Then success is true
@@ -46,7 +48,8 @@ Feature: Tests the Chenile Config Service using a REST client.
       "moduleName": "ctest",
       "keyName": "key1",
       "avalue": "value25",
-      "customAttribute": "tenant2"
+      "customAttribute": "tenant2",
+      "trajectoryId": "__GLOBAL__"
 	}
 	"""
     Then success is true
@@ -60,7 +63,8 @@ Feature: Tests the Chenile Config Service using a REST client.
       "keyName": "key2",
       "avalue": "456",
       "path": "abc",
-      "customAttribute": "tenant0"
+      "customAttribute": "tenant0",
+      "trajectoryId": "__GLOBAL__"
 	}
 	"""
     Then success is true
@@ -75,7 +79,8 @@ Feature: Tests the Chenile Config Service using a REST client.
       "keyName": "key2",
       "avalue": "101",
       "path": "fields.field1.range.1",
-      "customAttribute": "tenant0"
+      "customAttribute": "tenant0",
+      "trajectoryId": "__GLOBAL__"
 	}
 	"""
     Then success is true
@@ -90,7 +95,8 @@ Feature: Tests the Chenile Config Service using a REST client.
       "keyName": "key2",
       "avalue": "{\"range\": [2,200]}",
       "path": "fields.field2",
-      "customAttribute": "__GLOBAL__"
+      "customAttribute": "__GLOBAL__",
+      "trajectoryId": "__GLOBAL__"
 	}
 	"""
     Then success is true
@@ -104,7 +110,8 @@ Feature: Tests the Chenile Config Service using a REST client.
       "keyName": "key2",
       "avalue": "777",
       "path": "def",
-      "customAttribute": "tenant0"
+      "customAttribute": "tenant0",
+      "trajectoryId": "__GLOBAL__"
 	}
 	"""
     Then success is true
@@ -118,7 +125,8 @@ Feature: Tests the Chenile Config Service using a REST client.
       "keyName": "key3",
       "avalue": "some_other_value",
       "path": "some_name",
-      "customAttribute": "tenant0"
+      "customAttribute": "tenant0",
+      "trajectoryId": "__GLOBAL__"
 	}
 	"""
     Then success is true
@@ -131,7 +139,8 @@ Feature: Tests the Chenile Config Service using a REST client.
       "moduleName": "ctest",
       "keyName": "key6",
       "avalue": "{\"threshold\":10,\"flags\":{\"enabled\":true}}",
-      "customAttribute": "tenant-object"
+      "customAttribute": "tenant-object",
+      "trajectoryId": "__GLOBAL__"
 	}
 	"""
     Then success is true
@@ -144,7 +153,8 @@ Feature: Tests the Chenile Config Service using a REST client.
       "moduleName": "ctest",
       "keyName": "key7",
       "avalue": "[{\"range\":[5,6]},{\"range\":[7,8]}]",
-      "customAttribute": "tenant-array"
+      "customAttribute": "tenant-array",
+      "trajectoryId": "__GLOBAL__"
 	}
 	"""
     Then success is true
@@ -170,7 +180,8 @@ Feature: Tests the Chenile Config Service using a REST client.
     "keyName": "key3",
     "avalue": "456",
     "path": "key2.abc",
-    "customAttribute": "tenant0"
+    "customAttribute": "tenant0",
+      "trajectoryId": "__GLOBAL__"
   }
   """
     Then success is true

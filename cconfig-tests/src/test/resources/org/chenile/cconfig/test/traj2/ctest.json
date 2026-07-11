@@ -1,0 +1,14 @@
+{
+  "key1": "trajectory-base-key1",
+  "trajectoryBaseOnly": "trajectory-base-value",
+  "key2": {
+    "fields": {
+      "field1": {
+        "range": [
+          5,
+          500
+        ]
+      }
+    }
+  }
+}

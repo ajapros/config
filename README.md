@@ -44,15 +44,84 @@ a "customAttribute". In a SaaS implementation, the customAttribute can be
 tenant ID. It can also be a combination of multiple request headers which can be considered as per
 the specific requirements of an installation.
 
-## Tenant File Discovery
-If a tenant-specific file exists, it replaces the base module JSON file for that tenant. The lookup order is:
+## Why Trajectory-Aware Resource Layering Was Added
+The resource loader was extended to support trajectory-aware overrides because some installations need
+resource overrides that vary not just by custom attribute such as tenant, but also by trajectory.
 
-1. `<basePath>/<customAttribute>/<module>.json`
-2. `<basePath>/<module>.json`
+The concrete requirement was:
 
-This replacement happens at the JSON file loading layer. The base JSON and tenant JSON are not merged together.
-Later retrievers such as DB, environment, or message-bundle retrievers can still apply overlays on top of the
-selected JSON file.
+1. continue loading properties and JSON by module name as usual
+2. allow trajectory-level overrides for classpath resources
+3. allow the trajectory folder either directly under the base folder or under the custom-attribute folder
+4. prefer the trajectory folder under the custom-attribute folder when both are present
+5. return all matching resources, not just the single highest-priority one
+6. merge those resources so higher-priority resources override lower-priority ones
+
+## Resource Discovery And Priority
+Classpath resource discovery is now layered rather than replacement-based.
+
+For a resource such as `ctest.json` or `m1.properties`, Chenile now considers these locations:
+
+1. `<basePath>/<resource>`
+2. `<basePath>/<customAttribute>/<resource>`
+3. `<basePath>/<customAttribute>/<trajectoryId>/<resource>`
+4. `<basePath>/<trajectoryId>/<resource>`
+
+The effective priority order is:
+
+1. base resource
+2. custom-attribute resource
+3. trajectory resource
+
+For the trajectory resource, Chenile chooses only one trajectory path:
+
+1. prefer `<basePath>/<customAttribute>/<trajectoryId>/<resource>` if it exists
+2. otherwise use `<basePath>/<trajectoryId>/<resource>` if it exists
+
+This means the custom-attribute trajectory resource outranks the base trajectory resource when both are possible.
+
+All matched resources are returned and processed in ascending priority order so that higher-priority
+resources are applied later and therefore win on conflicts.
+
+## JSON Merge Rules
+JSON resources are no longer replacement-only.
+
+Chenile now:
+
+1. loads every matched JSON resource for the module
+2. parses them in priority order
+3. deep-merges object nodes
+4. lets higher-priority values override lower-priority values
+
+The merge decisions are:
+
+1. if both values are JSON objects, merge recursively
+2. if the higher-priority value is a scalar, replace the lower-priority value
+3. if the higher-priority value is an array, replace the lower-priority value
+
+So base JSON can establish defaults, tenant JSON can override part of the object, and a trajectory JSON
+can override that further without forcing the entire module file to be duplicated.
+
+## Properties Merge Rules
+Properties resources are also layered.
+
+Chenile now:
+
+1. loads every matched `.properties` resource
+2. converts each resource into `Cconfig` entries in priority order
+3. allows later resources to override earlier ones using the existing key/path manipulation pipeline
+
+This preserves the normal module-name filtering while allowing multiple resource layers to participate.
+
+## Cache Key
+Resolved module values are cached by:
+
+1. module
+2. custom attribute
+3. trajectory ID
+
+This is necessary because the same module and custom attribute can now legitimately resolve to different
+resource stacks for different trajectories.
 
 ## Module Nesting
 As discussed above, all configurations belong to a module. Sub Modules are also supported. Sub modules

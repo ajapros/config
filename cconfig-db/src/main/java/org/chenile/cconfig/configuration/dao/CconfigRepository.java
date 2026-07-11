@@ -7,5 +7,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository  public interface CconfigRepository extends JpaRepository<Cconfig,String> {
-    List<Cconfig> findByModuleNameAndCustomAttributeInOrderByKeyNameAscCustomAttributeAsc(String module,List<String> customAttributes);
+    List<Cconfig> findByModuleNameAndCustomAttributeInAndTrajectoryIdInOrderByKeyNameAscCustomAttributeAsc(
+            String module,List<String> customAttributes,List<String> trajectoryIds);
 }

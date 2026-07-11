@@ -1,0 +1,15 @@
+{
+  "key1": "tenant-traj-key1",
+  "trajectoryTenantOnly": "trajectory-tenant-value",
+  "key2": {
+    "abc": "999",
+    "fields": {
+      "field2": {
+        "range": [
+          200,
+          300
+        ]
+      }
+    }
+  }
+}

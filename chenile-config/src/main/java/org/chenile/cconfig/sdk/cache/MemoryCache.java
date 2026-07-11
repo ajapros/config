@@ -22,12 +22,13 @@ public class MemoryCache {
         this.ttlMillis = Math.max(0, effectiveTtl.toMillis());
     }
 
-    public void save(String module,String customAttribute, Map<String,Object> jsonMap){
-        configMap.put(new ConfigCacheKey(module,customAttribute),new CacheEntry(jsonMap, System.currentTimeMillis()));
+    public void save(String module,String customAttribute, String trajectoryId, Map<String,Object> jsonMap){
+        configMap.put(new ConfigCacheKey(module,customAttribute,trajectoryId),
+                new CacheEntry(jsonMap, System.currentTimeMillis()));
     }
 
-    public Map<String,Object> findJsonMap(String module, String customAttribute) {
-        ConfigCacheKey ckey = new ConfigCacheKey(module,customAttribute);
+    public Map<String,Object> findJsonMap(String module, String customAttribute, String trajectoryId) {
+        ConfigCacheKey ckey = new ConfigCacheKey(module,customAttribute,trajectoryId);
         CacheEntry entry = configMap.get(ckey);
         if (entry == null) {
             return null;

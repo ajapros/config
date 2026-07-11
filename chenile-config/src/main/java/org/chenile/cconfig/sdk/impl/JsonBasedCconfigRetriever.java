@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -34,18 +35,25 @@ public class JsonBasedCconfigRetriever implements Command<ConfigContext> {
     }
 
     private Map<String, Object> getJsonMapForModuleFromClassPath(ConfigContext configContext) {
-        String s = readModuleAsString(configContext);
-        if (s == null) {
+        List<String> jsonStrings = readModuleAsString(configContext);
+        if (jsonStrings.isEmpty()) {
             return new LinkedHashMap<>();
         }
-        try {
-            return objectMapper.readValue(s, new TypeReference<LinkedHashMap<String, Object>>() { });
-        } catch (Exception e) {
-            throw new ConfigurationException("1701", "Cconfig:Cannot parse module " + configContext.getModule(), e);
+        Map<String, Object> merged = new LinkedHashMap<>();
+        for (String jsonString : jsonStrings) {
+            try {
+                Map<String, Object> jsonMap = objectMapper.readValue(jsonString,
+                        new TypeReference<LinkedHashMap<String, Object>>() { });
+                deepMerge(merged, jsonMap);
+            } catch (Exception e) {
+                throw new ConfigurationException("1701",
+                        "Cconfig:Cannot parse module " + configContext.getModule(), e);
+            }
         }
+        return merged;
     }
 
-    private String readModuleAsString(ConfigContext configContext) {
+    private List<String> readModuleAsString(ConfigContext configContext) {
         String module = configContext.getModule();
         String resourceName = module;
         String basePath = configPath;
@@ -54,17 +62,35 @@ public class JsonBasedCconfigRetriever implements Command<ConfigContext> {
             basePath = configPath + "/" + module.substring(0, lastDot).replace('.', '/');
             resourceName = module.substring(lastDot + 1);
         }
-        logger.debug("Finding the JSON file under {} with resource {} and custom attribute {}",
-                basePath, resourceName + ".json", configContext.getCustomAttribute());
+        logger.debug("Finding the JSON file under {} with resource {}, custom attribute {} and trajectory {}",
+                basePath, resourceName + ".json", configContext.getCustomAttribute(), configContext.getTrajectoryId());
 
-        try (InputStream stream = ResourceSupport.resourceLoader(basePath, resourceName + ".json",
-                configContext.getCustomAttribute())) {
-            if (stream == null) {
-                return null;
+        List<String> contents = new java.util.ArrayList<>();
+        try {
+            for (ResourceSupport.ResolvedResource resource : ResourceSupport.resourceLoader(
+                    basePath, resourceName + ".json", configContext.getCustomAttribute(), configContext.getTrajectoryId())) {
+                try (InputStream stream = resource.openStream()) {
+                    contents.add(new String(stream.readAllBytes(), StandardCharsets.UTF_8));
+                }
             }
-            return new String(stream.readAllBytes(), StandardCharsets.UTF_8);
+            return contents;
         } catch (Exception e) {
             throw new ConfigurationException("1700", "Cconfig:Cannot read module " + module, e);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void deepMerge(Map<String, Object> target, Map<String, Object> source) {
+        for (Map.Entry<String, Object> entry : source.entrySet()) {
+            Object existing = target.get(entry.getKey());
+            Object incoming = entry.getValue();
+            if (existing instanceof Map<?, ?> existingMap && incoming instanceof Map<?, ?> incomingMap) {
+                Map<String, Object> merged = new LinkedHashMap<>((Map<String, Object>) existingMap);
+                deepMerge(merged, (Map<String, Object>) incomingMap);
+                target.put(entry.getKey(), merged);
+            } else {
+                target.put(entry.getKey(), incoming);
+            }
         }
     }
 }
