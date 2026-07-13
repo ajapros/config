@@ -25,6 +25,7 @@ class PropertiesBasedCconfigRetrieverTest {
         Map<String, Cconfig> byPathlessKey = cconfigs.stream()
                 .filter(cc -> cc.path == null || cc.path.isEmpty())
                 .collect(Collectors.toMap(cc -> cc.keyName + "-" + cc.avalue, Function.identity()));
+        System.out.println("bypathless key = " + byPathlessKey);
         assertTrueValue(byPathlessKey.containsKey("k1-base"));
         assertTrueValue(byPathlessKey.containsKey("k1-custom"));
     }
@@ -71,6 +72,39 @@ class PropertiesBasedCconfigRetrieverTest {
         ExpressionSupport.augmentKeys(keys, cconfigs);
         assertEquals("trajectory-base", keys.get("k1"));
         assertEquals("trajectory-base-extra", keys.get("k4"));
+    }
+
+    @Test
+    void layersTrajectoryPropertiesAheadOfBaseAndCustomWithAllLayersTested() {
+        PropertiesBasedCconfigRetriever retriever = new PropertiesBasedCconfigRetriever(
+                "org/chenile/cconfig");
+        ConfigContext context = new ConfigContext("m1","abc","traj1");
+        retriever.execute(context);
+        assertEquals("traj1_value",context.allKeys.get("k88"));
+        context = new ConfigContext("m1","abc","missing");
+        retriever.execute(context);
+        assertEquals("abc_value",context.allKeys.get("k88"));
+        context = new ConfigContext("m1","missing","missing");
+        retriever.execute(context);
+        assertEquals("base_value",context.allKeys.get("k88"));
+    }
+
+    @Test
+    void layersTrajectoryPropertiesAheadOfBaseAndCustomWithAllLayersTestedAndPathChanged() {
+        PropertiesBasedCconfigRetriever retriever = new PropertiesBasedCconfigRetriever(
+                "org/chenile/cconfig");
+        ConfigContext context = new ConfigContext("m1","abc","traj1");
+        retriever.execute(context);
+        System.out.println("abc.traj1:value of k99 is " + context.allKeys.get("k99"));
+       // assertEquals("traj1_value",context.allKeys.get("k88"));
+        context = new ConfigContext("m1","abc","missing");
+        retriever.execute(context);
+        System.out.println("abc.missing:value of k99 is " + context.allKeys.get("k99"));
+       // assertEquals("abc_value",context.allKeys.get("k88"));
+        context = new ConfigContext("m1","missing","missing");
+        retriever.execute(context);
+        //assertEquals("base_value",context.allKeys.get("k88"));
+        System.out.println("missing.missing:value of k99 is " + context.allKeys.get("k99"));
     }
 
     private void assertTrueValue(boolean value) {

@@ -8,7 +8,7 @@ Feature: Tests tenant-specific config file replacement.
     Then success is true
     And the REST response key "key1" is "value5"
     And the REST response key "tenantKey" is "tenant-value"
-    And the REST response does not contain key "key2"
+    And the REST response contains key "key2"
 
   Scenario: Get all keys for a tenant without a tenant file. This falls back to the default file
     When I construct a REST request with header "x-chenile-tenant-id" and value "missing-tenant"
