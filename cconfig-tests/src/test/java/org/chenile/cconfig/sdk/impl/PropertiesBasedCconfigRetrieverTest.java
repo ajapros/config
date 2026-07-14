@@ -104,6 +104,22 @@ class PropertiesBasedCconfigRetrieverTest {
         assertEquals("base_traj8_marker", context.allKeys.get("k23"));
     }
 
+    @Test
+    void mergesBaseAndTrajectoryPropertyFilesWhenBothExistAndCustomTrajectoryOverrideDoesNotExist() {
+        PropertiesBasedCconfigRetriever retriever = new PropertiesBasedCconfigRetriever(
+                "org/chenile/cconfig");
+        ConfigContext context = new ConfigContext("m1","abc","traj8");
+        retriever.execute(context);
+        @SuppressWarnings("unchecked")
+        Map<String, Object> k22 = (Map<String, Object>) context.allKeys.get("k22");
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> fields = (List<Map<String, Object>>) k22.get("fields");
+        assertEquals("f1", fields.get(0).get("name"));
+        assertEquals("base_traj8_value", fields.get(0).get("value"));
+        assertEquals("base_traj8_value", fields.get(0).get("new_value"));
+        assertEquals("base_traj8_marker", context.allKeys.get("k23"));
+    }
+
     private void assertTrueValue(boolean value) {
         assertEquals(true, value);
     }
