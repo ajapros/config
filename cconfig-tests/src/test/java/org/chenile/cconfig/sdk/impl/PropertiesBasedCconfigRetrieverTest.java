@@ -100,6 +100,7 @@ class PropertiesBasedCconfigRetrieverTest {
         List<Map<String, Object>> fields = (List<Map<String, Object>>) k22.get("fields");
         assertEquals("ztenant_f1", fields.get(0).get("name"));
         assertEquals("ztenant_traj8_value", fields.get(0).get("value"));
+        assertEquals("base_traj8_value", fields.get(0).get("new_value"));
         assertEquals("base_traj8_marker", context.allKeys.get("k23"));
     }
 

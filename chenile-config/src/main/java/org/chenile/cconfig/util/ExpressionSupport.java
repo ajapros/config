@@ -75,8 +75,8 @@ public class ExpressionSupport {
      * @return the expression in a form that is amenable to be used as a SPEL expression for maps
      */
     private static String mapExpression(String p){
-        // first convert all expressions of type a[b] to ['a']['b']
-        p = p.replaceAll("(\\w+)\\[(\\w+)\\]", "['$1']['$2']");
+        // first convert all expressions of type a[b] to a.b
+        p = p.replaceAll("\\[([^\\]]+)\\]", ".$1");
         String[] arr = p.split("\\.");
         StringBuilder sb = new StringBuilder();
         for (String part: arr){
@@ -100,7 +100,6 @@ public class ExpressionSupport {
             return objectify(dbValue);
 
         String mappedExpression = mapExpression(path);
-        System.out.println("Mapped Expression: " + mappedExpression);
         Expression exp = parser.parseExpression(mappedExpression);
         EvaluationContext context = new StandardEvaluationContext(value);
         logger.debug("Value = {}.Path of the expression in SPEL is {}. key = {}. dbvalue is {}",value,mapExpression(path),

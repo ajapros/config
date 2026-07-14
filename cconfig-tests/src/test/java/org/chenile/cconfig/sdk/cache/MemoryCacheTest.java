@@ -14,9 +14,9 @@ class MemoryCacheTest {
         MemoryCache memoryCache = new MemoryCache();
         Map<String, Object> value = Map.of("k1", "v1");
 
-        memoryCache.save("m1", "tenant0", "traj1", value);
+        memoryCache.save("m1", "tenant0", "traj8", value);
 
-        assertEquals(value, memoryCache.findJsonMap("m1", "tenant0", "traj1"));
+        assertEquals(value, memoryCache.findJsonMap("m1", "tenant0", "traj8"));
         assertNull(memoryCache.findJsonMap("m1", "tenant0", "traj2"));
     }
 }
