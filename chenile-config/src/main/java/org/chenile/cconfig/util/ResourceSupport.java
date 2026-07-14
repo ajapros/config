@@ -10,7 +10,8 @@ import java.util.List;
 public final class ResourceSupport {
     private static final int BASE_PRIORITY = 0;
     private static final int CUSTOM_PRIORITY = 1;
-    private static final int TRAJECTORY_PRIORITY = 2;
+    private static final int BASE_TRAJECTORY_PRIORITY = 2;
+    private static final int CUSTOM_TRAJECTORY_PRIORITY = 3;
 
     private ResourceSupport() {
     }
@@ -39,11 +40,8 @@ public final class ResourceSupport {
                     CUSTOM_PRIORITY);
         }
 
-        String trajectoryPath = preferredTrajectoryPath(classLoader, normalizedBasePath, normalizedResourceName,
+        addTrajectoryResources(classLoader, resolvedResources, normalizedBasePath, normalizedResourceName,
                 customAttribute, trajectoryId);
-        if (trajectoryPath != null) {
-            addResources(classLoader, resolvedResources, trajectoryPath, TRAJECTORY_PRIORITY);
-        }
 
         resolvedResources.sort(Comparator
                 .comparingInt(ResolvedResource::getPriority)
@@ -67,34 +65,24 @@ public final class ResourceSupport {
         }
     }
 
-    private static String preferredTrajectoryPath(
+    private static void addTrajectoryResources(
             ClassLoader classLoader,
+            List<ResolvedResource> resolvedResources,
             String normalizedBasePath,
             String normalizedResourceName,
             String customAttribute,
             String trajectoryId
     ) {
         if (trajectoryId == null || trajectoryId.isBlank()) {
-            return null;
+            return;
         }
         String normalizedTrajectoryId = normalizePath(trajectoryId);
+        String baseTrajectoryPath = normalizedBasePath + "/" + normalizedTrajectoryId + "/" + normalizedResourceName;
+        addResources(classLoader, resolvedResources, baseTrajectoryPath, BASE_TRAJECTORY_PRIORITY);
         if (customAttribute != null && !customAttribute.isBlank()) {
             String customTrajectoryPath = normalizedBasePath + "/" + normalizePath(customAttribute) + "/"
                     + normalizedTrajectoryId + "/" + normalizedResourceName;
-            if (resourceExists(classLoader, customTrajectoryPath)) {
-                return customTrajectoryPath;
-            }
-        }
-        String baseTrajectoryPath = normalizedBasePath + "/" + normalizedTrajectoryId + "/" + normalizedResourceName;
-        return resourceExists(classLoader, baseTrajectoryPath) ? baseTrajectoryPath : null;
-    }
-
-    private static boolean resourceExists(ClassLoader classLoader, String location) {
-        try {
-            Enumeration<URL> resources = classLoader.getResources(location);
-            return resources.hasMoreElements();
-        } catch (Exception e) {
-            throw new IllegalStateException("Cannot inspect resource " + location, e);
+            addResources(classLoader, resolvedResources, customTrajectoryPath, CUSTOM_TRAJECTORY_PRIORITY);
         }
     }
 

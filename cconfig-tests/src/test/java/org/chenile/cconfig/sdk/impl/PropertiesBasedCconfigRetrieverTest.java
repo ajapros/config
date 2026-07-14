@@ -21,11 +21,10 @@ class PropertiesBasedCconfigRetrieverTest {
 
         List<Cconfig> cconfigs = retriever.retrieveCconfigs(new ConfigContext("m1", "abc", "missing"));
 
-        assertEquals(4, cconfigs.size());
+        assertEquals(9, cconfigs.size());
         Map<String, Cconfig> byPathlessKey = cconfigs.stream()
                 .filter(cc -> cc.path == null || cc.path.isEmpty())
                 .collect(Collectors.toMap(cc -> cc.keyName + "-" + cc.avalue, Function.identity()));
-        System.out.println("bypathless key = " + byPathlessKey);
         assertTrueValue(byPathlessKey.containsKey("k1-base"));
         assertTrueValue(byPathlessKey.containsKey("k1-custom"));
     }
@@ -37,7 +36,7 @@ class PropertiesBasedCconfigRetrieverTest {
 
         List<Cconfig> cconfigs = retriever.retrieveCconfigs(new ConfigContext("m1", "missing", "missing"));
 
-        assertEquals(2, cconfigs.size());
+        assertEquals(5, cconfigs.size());
         Map<String, Cconfig> byKey = cconfigs.stream().collect(Collectors.toMap(cc -> cc.keyName, Function.identity()));
         assertEquals("base", byKey.get("k1").avalue);
         assertEquals("path.to.value", byKey.get("k2").path);
@@ -51,7 +50,7 @@ class PropertiesBasedCconfigRetrieverTest {
 
         List<Cconfig> cconfigs = retriever.retrieveCconfigs(new ConfigContext("m1", "abc", "traj1"));
 
-        assertEquals(6, cconfigs.size());
+        assertEquals(13, cconfigs.size());
         Map<String, Object> keys = new LinkedHashMap<>();
         keys.put("k1", "seed");
         ExpressionSupport.augmentKeys(keys, cconfigs);
@@ -66,7 +65,7 @@ class PropertiesBasedCconfigRetrieverTest {
 
         List<Cconfig> cconfigs = retriever.retrieveCconfigs(new ConfigContext("m1", "abc", "traj2"));
 
-        assertEquals(6, cconfigs.size());
+        assertEquals(11, cconfigs.size());
         Map<String, Object> keys = new LinkedHashMap<>();
         keys.put("k1", "seed");
         ExpressionSupport.augmentKeys(keys, cconfigs);
@@ -90,21 +89,18 @@ class PropertiesBasedCconfigRetrieverTest {
     }
 
     @Test
-    void layersTrajectoryPropertiesAheadOfBaseAndCustomWithAllLayersTestedAndPathChanged() {
+    void mergesBaseAndCustomTrajectoryPropertyFilesWhenBothExist() {
         PropertiesBasedCconfigRetriever retriever = new PropertiesBasedCconfigRetriever(
                 "org/chenile/cconfig");
-        ConfigContext context = new ConfigContext("m1","abc","traj1");
+        ConfigContext context = new ConfigContext("m1","z_tenant","traj8");
         retriever.execute(context);
-        System.out.println("abc.traj1:value of k99 is " + context.allKeys.get("k99"));
-       // assertEquals("traj1_value",context.allKeys.get("k88"));
-        context = new ConfigContext("m1","abc","missing");
-        retriever.execute(context);
-        System.out.println("abc.missing:value of k99 is " + context.allKeys.get("k99"));
-       // assertEquals("abc_value",context.allKeys.get("k88"));
-        context = new ConfigContext("m1","missing","missing");
-        retriever.execute(context);
-        //assertEquals("base_value",context.allKeys.get("k88"));
-        System.out.println("missing.missing:value of k99 is " + context.allKeys.get("k99"));
+        @SuppressWarnings("unchecked")
+        Map<String, Object> k22 = (Map<String, Object>) context.allKeys.get("k22");
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> fields = (List<Map<String, Object>>) k22.get("fields");
+        assertEquals("ztenant_f1", fields.get(0).get("name"));
+        assertEquals("ztenant_traj8_value", fields.get(0).get("value"));
+        assertEquals("base_traj8_marker", context.allKeys.get("k23"));
     }
 
     private void assertTrueValue(boolean value) {

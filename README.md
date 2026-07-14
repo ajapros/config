@@ -64,21 +64,19 @@ For a resource such as `ctest.json` or `m1.properties`, Chenile now considers th
 
 1. `<basePath>/<resource>`
 2. `<basePath>/<customAttribute>/<resource>`
-3. `<basePath>/<customAttribute>/<trajectoryId>/<resource>`
-4. `<basePath>/<trajectoryId>/<resource>`
+3. `<basePath>/<trajectoryId>/<resource>`
+4. `<basePath>/<customAttribute>/<trajectoryId>/<resource>`
 
 The effective priority order is:
 
 1. base resource
 2. custom-attribute resource
-3. trajectory resource
+3. base trajectory resource
+4. custom-attribute trajectory resource
 
-For the trajectory resource, Chenile chooses only one trajectory path:
-
-1. prefer `<basePath>/<customAttribute>/<trajectoryId>/<resource>` if it exists
-2. otherwise use `<basePath>/<trajectoryId>/<resource>` if it exists
-
-This means the custom-attribute trajectory resource outranks the base trajectory resource when both are possible.
+Both trajectory paths are considered when they exist. The custom-attribute trajectory resource is applied
+after the base trajectory resource, so it has higher precedence without suppressing the lower-priority
+trajectory file.
 
 All matched resources are returned and processed in ascending priority order so that higher-priority
 resources are applied later and therefore win on conflicts.
@@ -112,6 +110,8 @@ Chenile now:
 3. allows later resources to override earlier ones using the existing key/path manipulation pipeline
 
 This preserves the normal module-name filtering while allowing multiple resource layers to participate.
+If both trajectory folders exist, both property files are loaded, with the custom-attribute trajectory
+layer winning only where it explicitly overrides keys from the base trajectory layer.
 
 ## Cache Key
 Resolved module values are cached by:

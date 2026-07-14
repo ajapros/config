@@ -51,7 +51,7 @@ class JsonBasedCconfigRetrieverTest {
     }
 
     @Test
-    void mergesBaseCustomAndCustomTrajectoryJsonWhenCustomTrajectoryIsPresent() {
+    void mergesBaseCustomBaseTrajectoryAndCustomTrajectoryJsonWhenAllLayersArePresent() {
         JsonBasedCconfigRetriever retriever = new JsonBasedCconfigRetriever("org/chenile/cconfig/test");
         ConfigContext configContext = new ConfigContext("ctest", "tenant-json", "traj1");
 
@@ -60,6 +60,7 @@ class JsonBasedCconfigRetrieverTest {
         Map<String, Object> allKeys = configContext.allKeys;
         assertEquals("tenant-traj-key1", allKeys.get("key1"));
         assertEquals("tenant-value", allKeys.get("tenantKey"));
+        assertEquals("trajectory-base-value", allKeys.get("trajectoryBaseOnly"));
         assertEquals("trajectory-tenant-value", allKeys.get("trajectoryTenantOnly"));
         Map<String, Object> key2 = castMap(allKeys.get("key2"));
         assertEquals("999", key2.get("abc"));

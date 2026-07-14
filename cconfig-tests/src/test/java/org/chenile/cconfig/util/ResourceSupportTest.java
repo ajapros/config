@@ -19,8 +19,8 @@ class ResourceSupportTest {
     }
 
     @Test
-    void prefersCustomTrajectoryResourceOverBaseTrajectoryResourceWhenPresent() {
-        assertEquals(List.of("default", "custom", "trajectory-custom"),
+    void includesBothTrajectoryResourcesAndKeepsCustomTrajectoryLast() {
+        assertEquals(List.of("default", "custom", "trajectory-base", "trajectory-custom"),
                 readAll("org/chenile/base", "ctest.json", "abc", "traj1"));
     }
 
